@@ -1,2 +1,2 @@
-# sloth-d3m-wrapper
-Sloth - Strategic Labeling Over Time Heuristics - Tools for time series analysis - D3M Wrapper
+# possum-d3m-wrapper
+Possum - Post Summarization - D3M Wrapper
