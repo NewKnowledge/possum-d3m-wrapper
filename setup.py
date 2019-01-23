@@ -1,17 +1,16 @@
 from distutils.core import setup
 
-setup(name='SlothD3MWrapper',
-    version='2.0.1',
-    description='A thin wrapper for interacting with New Knowledge time series tool library Sloth',
-    packages=['SlothD3MWrapper'],
-    install_requires=["typing",
-        "Sloth==2.0.2"],
+setup(name='PossumD3MWrapper',
+    version='1.0.0',
+    description='A thin wrapper for interacting with New Knowledge text summarization library Possum',
+    packages=['PossumD3MWrapper'],
+    install_requires=['Possum==1.0.0'],
     dependency_links=[
-        "git+https://github.com/NewKnowledge/sloth@fafa4857f02c91c36c22e0d3efb16ab90d47e62d#egg=Sloth-2.0.2"
+        "git+https://github.com/NewKnowledge/possum@ffc4d92ac7f08fd291617c714a6fd023469d7924#egg=Possum-1.0.0"
     ],
     entry_points = {
         'd3m.primitives': [
-            'distil.Sloth.cluster = SlothD3MWrapper:Storc'
+            'distil.Possum = PossumD3MWrapper:nk_possum'
         ],
     },
 )

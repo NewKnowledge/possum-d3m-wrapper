@@ -1,7 +1,7 @@
-from SlothD3MWrapper.Storc import Storc
+from PossumD3MWrapper.nk_possum import nk_possum
 
-__version__ = '2.0.1'
+__version__ = '1.0.0'
 
 __all__ = [
-           "Storc"
+           "nk_possum"
            ]

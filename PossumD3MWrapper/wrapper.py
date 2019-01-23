@@ -1,10 +1,10 @@
 import sys
 import os.path
+import os
 import numpy as np
 import pandas
-import typing
 
-from Sloth import Sloth
+from Possum import Possum
 from tslearn.datasets import CachedDatasets
 
 from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
@@ -16,45 +16,42 @@ from d3m.metadata import hyperparams, base as metadata_base
 from d3m.primitives.datasets import DatasetToDataFrame
 from common_primitives import utils as utils_cp
 
-from timeseriesloader.timeseries_loader import TimeSeriesLoaderPrimitive
-
 __author__ = 'Distil'
-__version__ = '2.0.1'
+__version__ = '1.0.0'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
 
 class Hyperparams(hyperparams.Hyperparams):
-    algorithm = hyperparams.Enumeration(default = 'GlobalAlignmentKernelKMeans', 
+    algorithm = hyperparams.Enumeration(default = 'text_rank', 
         semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
-        values = ['GlobalAlignmentKernelKMeans', 'TimeSeriesKMeans', 'DBSCAN', 'HDBSCAN'],
-        description = 'type of clustering algorithm to use')
-    nclusters = hyperparams.UniformInt(lower=1, upper=sys.maxsize, default=3, semantic_types=
-        ['https://metadata.datadrivendiscovery.org/types/TuningParameter'], description = 'number of clusters \
-        to user in kernel kmeans algorithm')
-    eps = hyperparams.Uniform(lower=0, upper=sys.maxsize, default = 0.5, semantic_types = 
-        ['https://metadata.datadrivendiscovery.org/types/TuningParameter'], 
-        description = 'maximum distance between two samples for them to be considered as in the same neigborhood, \
-        used in DBSCAN algorithm')
-    min_samples = hyperparams.UniformInt(lower=1, upper=sys.maxsize, default = 5, semantic_types = 
-        ['https://metadata.datadrivendiscovery.org/types/TuningParameter'], 
-        description = 'number of samples in a neighborhood for a point to be considered as a core point, \
-        used in DBSCAN and HDBSCAN algorithms')   
+        values = ['luhn','edmundson','lsa','text_rank','sum_basic','kl'],
+        description = 'type of summarization algorithm to use')
+    source_type = hyperparams.Enumeration(default = 'plain_text', 
+        semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        values = ['plain_text','url'],
+        description = 'type of source documents to be analyzed')
+    language = hyperparams.Enumeration(default = 'english', 
+        semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        values = ['danish','dutch','english','finnish','french','german','hungarian','italian','norwegian','porter','portuguese','romanian','russian','spanish','swedish'],
+        description = 'language to use for the NLTK stemming process')
+    nsentences = hyperparams.UniformInt(lower=1, upper=sys.maxsize, default=20, semantic_types=
+        ['https://metadata.datadrivendiscovery.org/types/ControlParameter'], description = 'number of summary sentences to return')  
     pass
 
-class Storc(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
+class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "77bf4b92-2faa-3e38-bb7e-804131243a7f",
         'version': __version__,
-        'name': "Sloth",
+        'name': "Possum",
         # Keywords do not have a controlled vocabulary. Authors can put here whatever they find suitable.
-        'keywords': ['Time Series','Clustering'],
+        'keywords': ['Natural Language Processing','NLP','Text Summarization'],
         'source': {
             'name': __author__,
             'uris': [
                 # Unstructured URIs.
-                "https://github.com/NewKnowledge/sloth-d3m-wrapper",
+                "https://github.com/NewKnowledge/possum-d3m-wrapper",
             ],
         },
         # A list of dependencies in order. These can be Python packages, system packages, or Docker images.
@@ -63,114 +60,90 @@ class Storc(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         # a dependency which is not on PyPi.
          'installation': [{
             'type': metadata_base.PrimitiveInstallationType.PIP,
-            'package': 'cython',
-            'version': '0.28.5',
-        },{
-            'type': metadata_base.PrimitiveInstallationType.PIP,
-            'package_uri': 'git+https://github.com/NewKnowledge/sloth-d3m-wrapper.git@{git_commit}#egg=SlothD3MWrapper'.format(
+            'package_uri': 'git+https://github.com/NewKnowledge/possum-d3m-wrapper.git@{git_commit}#egg=PossumD3MWrapper'.format(
                 git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
         }],
         # The same path the primitive is registered with entry points in setup.py.
-        'python_path': 'd3m.primitives.distil.Sloth.cluster',
+        'python_path': 'd3m.primitives.distil.Possum',
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
         # best describe the primitive, make a merge request.
         'algorithm_types': [
-            metadata_base.PrimitiveAlgorithmType.SPECTRAL_CLUSTERING,
+            metadata_base.PrimitiveAlgorithmType.LATENT_SEMANTIC_ANALYSIS
         ],
-        'primitive_family': metadata_base.PrimitiveFamily.TIME_SERIES_SEGMENTATION,
+        'primitive_family': metadata_base.PrimitiveFamily.FEATURE_EXTRACTION ,
     })
 
-    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0)-> None:
-        super().__init__(hyperparams=hyperparams, random_seed=random_seed)
+    def __init__(self, *, hyperparams: Hyperparams)-> None:
+        super().__init__(hyperparams=hyperparams)
 
-    def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
+    def produce(self, *, inputs: Inputs) -> CallResult[Outputs]:
         """
-        Produce primitive's best guess for the structural type of each input column.
+        Applies the selected text summarization.
 
         Parameters
         ----------
-        inputs : Input pandas frame where each row is a series.  Series timestamps are store in the column names.
+        inputs : Input pandas dataframe where each row is a string representing a text document or a URL (if the source_type parameter is 'url').  
 
         Returns
         -------
         Outputs
-            The output is a dataframe containing a single column where each entry is the associated series' cluster number.
+            The output is a dataframe containing the requested number of summary sentences. The sentence column contains a summary sentence, and the importance column contains the weighted importance as a float number.
         """
-        # setup model up
-        sloth = Sloth()
+        process_id = os.getpid()
+        
+        # set up model
+        TopicExtractor = Possum()
 
-        # set number of clusters for k-means
-        if self.hyperparams['algorithm'] == 'TimeSeriesKMeans':
+        # set number of sentences to be returned
+        if self.hyperparams['nsentences'] < 1 or not self.hyperparams['nsentences']:
             # enforce default value
-            if not self.hyperparams['nclusters']:
-                nclusters = 4
-            else:
-                nclusters = self.hyperparams['nclusters']
-            labels = sloth.ClusterSeriesKMeans(inputs.values, nclusters, 'TimeSeriesKMeans')
-        elif self.hyperparams['algorithm'] == 'DBSCAN':
-            # enforce default value
-            if not self.hyperparams['eps']:
-                nclusters = 0.5
-            else:
-                eps = self.hyperparams['eps']
-            if not self.hyperparams['min_samples']:
-                min_samples = 5
-            else:
-                min_samples = self.hyperparams['min_samples']
-                SimilarityMatrix = sloth.GenerateSimilarityMatrix(inputs.values)
-                nclusters, labels, cnt = sloth.ClusterSimilarityMatrix(SimilarityMatrix, eps, min_samples)
-        elif self.hyperparams['algorithm'] == 'HDBSCAN':
-            # enforce default value
-            if not self.hyperparams['min_samples']:
-                min_samples = 5
-            else:
-                min_samples = self.hyperparams['min_samples']
-                SimilarityMatrix = sloth.GenerateSimilarityMatrix(inpust.values)
-                nclusters, labels, cnt = sloth.HClusterSimilarityMatrix(SimilarityMatrix, min_samples)
+            nsentences = 20
         else:
-            # enforce default value
-            if not self.hyperparams['nclusters']:
-                nclusters = 4
-            else:
-                nclusters = self.hyperparams['nclusters']
-            labels = sloth.ClusterSeriesKMeans(inputs.values, nclusters, 'GlobalAlignmentKernelKMeans')       
+            nsentences = self.hyperparams['nsentences']
+            
+        if self.hyperparams['source_type'] == 'url':
+            HTML_flag = True
+        else:
+            HTML_flag = False
+      
+        # Create a pandas dataframe from the input values.
+        input_df = pandas.DataFrame(inputs.values)
+        print(input)
+        
+        # Write the inputs to a temporary file to be processed.
+        filename = 'temp_' + process_id + '.txt'
+        input_df.to_csv(filename,index=False)
+        
+        try:
+            sentences = TopicExtractor.ExtractivelySummarizeCorpus(corpus_path=filename,HTML=HTML_flag,sentence_count=nsentences)
+        except Exception:
+            print('Error creating summary sentences.')
+            sys.exit(-1)
+        print(sentences)
+        
+        try:
+            extracted_topics = TopicExtractor.ExtractTopics(sentences)
+        except Exception:
+            print('Error creating importance weights.')
+            sys.exit(-1)
+        print(extracted_topics)
 
-        # add metadata to output
-        out_df_sloth = pandas.DataFrame(labels)
-        out_df_sloth.columns = ['labels']
+        # Create the output dataframe
+        out_df_possum = pd.DataFrame.from_dict(extracted_topics, orient='index',
+...                        columns=['sentence', 'importance_weight'])
+        print(out_df_possum)
+        outd3m_df_possum = d3m_DataFrame(out_df_possum)
 
-        # initialize the output dataframe as input dataframe (results will be appended to it)
-        # out_df = d3m_DataFrame(inputs)
-
-        sloth_df = d3m_DataFrame(out_df_sloth)
-        # first column ('labels')
-        col_dict = dict(sloth_df.metadata.query((metadata_base.ALL_ELEMENTS, 0)))
-        col_dict['structural_type'] = type("1")
-        col_dict['name'] = 'labels'
-        col_dict['semantic_types'] = ('http://schema.org/Integer', 'https://metadata.datadrivendiscovery.org/types/Attribute')
-        sloth_df.metadata = sloth_df.metadata.update((metadata_base.ALL_ELEMENTS, 0), col_dict)
-
-        # concatentate final output frame -- not real consensus from program, so commenting out for now
-        # out_df = utils_cp.append_columns(out_df, sloth_df)
-
-        return CallResult(sloth_df)
+        return CallResult(outd3m_df_possum)
 
 if __name__ == '__main__':
-    # Load data and preprocessing
-    input_dataset = container.Dataset.load('file:///data/home/jgleason/D3m/datasets/seed_datasets_current/66_chlorineConcentration/66_chlorineConcentration_dataset/tables/learningData.csv')
-    ds2df_client = DatasetToDataFrame(hyperparams = {"dataframe_resource":"0"})
-    df = d3m_DataFrame(ds2df_client.produce(inputs = input_dataset).value)    
-    ts_loader = TimeSeriesLoaderPrimitive(hyperparams = {"time_col_index":0, "value_col_index":1,"file_col_index":1})
-    metadata_dict = dict(df.metadata.query_column(ts_loader.hyperparams['file_col_index']))
-    metadata_dict['semantic_types'] = ('https://metadata.datadrivendiscovery.org/types/FileName', 'https://metadata.datadrivendiscovery.org/types/Timeseries')
-    metadata_dict['media_types'] = ('text/csv',)
-    metadata_dict['location_base_uris'] = ('file:///data/home/jgleason/D3m/datasets/seed_datasets_current/66_chlorineConcentration/66_chlorineConcentration_dataset/timeseries/',)
-    df.metadata = df.metadata.update_column(ts_loader.hyperparams['file_col_index'], metadata_dict)
-    ts_values = ts_loader.produce(inputs = df)	    
-
-    #storc_client = Storc(hyperparams={'algorithm':'GlobalAlignmentKernelKMeans','nclusters':4})
-    storc_client = Storc(hyperparams={'algorithm':'DBSCAN','eps':0.5, 'min_samples':5})
+    # Load test data and run 
+    # SIAM 2007 Text Mining Competition dataset (first 100 rows)
+    # https://c3.nasa.gov/dashlink/resources/138/
+    input_df = pd.read_csv('data/NASA_TestData.txt', dtype=str, header=None)
+    inputs = d3m_DataFrame(input_df)
+    possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 'language':'english','nsentences':30})
     #frame = pandas.read_csv("path/csv_containing_one_series_per_row.csv",dtype=str)
-    result = storc_client.produce(inputs = ts_values.value.head(100))
+    result = possum_client.produce(inputs)
     print(result.value)
