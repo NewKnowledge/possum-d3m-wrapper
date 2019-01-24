@@ -140,11 +140,11 @@ if __name__ == '__main__':
     # Load test data and run 
     # SIAM 2007 Text Mining Competition dataset (first 100 rows)
     # https://c3.nasa.gov/dashlink/resources/138/
-    input_df = pd.read_csv('data/NASA_TestData.txt', dtype=str, header=None)
+    input_df = pd.read_csv('data/NASA_TestData.txt', dtype=str, header=None,index_col=False)
     inputs = d3m_DataFrame(input_df)
     print(inputs)
     print(type(inputs))
     possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 'language':'english','nsentences':30})
     #frame = pandas.read_csv("path/csv_containing_one_series_per_row.csv",dtype=str)
-    result = possum_client.produce(inputs)
+    result = possum_client.produce(inputs=inputs.value)
     print(result.value)
