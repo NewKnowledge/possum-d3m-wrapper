@@ -2,7 +2,7 @@ import sys
 import os.path
 import os
 import numpy as np
-import pandas as pd
+import pandas
 
 from Possum import Possum
 from tslearn.datasets import CachedDatasets
@@ -130,7 +130,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         print(extracted_topics)
 
         # Create the output dataframe
-        out_df_possum = pd.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
+        out_df_possum = pandas.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
         print(out_df_possum)
         outd3m_df_possum = d3m_DataFrame(out_df_possum)
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # Load test data and run 
     # SIAM 2007 Text Mining Competition dataset (first 100 rows)
     # https://c3.nasa.gov/dashlink/resources/138/
-    input_df = pd.read_csv('data/NASA_TestData.txt', dtype=str, header=None,index_col=False)
+    input_df = pandas.read_csv('data/NASA_TestData.txt', dtype=str, header=None,index_col=False)
     inputs = d3m_DataFrame(input_df)
     print(inputs)
     print(type(inputs))
