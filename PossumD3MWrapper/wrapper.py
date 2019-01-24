@@ -108,8 +108,9 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             HTML_flag = False
       
         # Create a pandas dataframe from the input values.
-        input_df = pandas.DataFrame(inputs.values)
-        print(input)
+        #input_df = pandas.DataFrame(inputs.values)
+        print(type(inputs))
+        input_df = pandas.DataFrame(inputs)
         
         # Write the inputs to a temporary file to be processed.
         filename = 'temp_' + process_id + '.txt'
