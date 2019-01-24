@@ -109,11 +109,14 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
       
         # Create a pandas dataframe from the input values.
         #input_df = pandas.DataFrame(inputs.values)
-        print(type(inputs))
+        
         input_df = pandas.DataFrame(inputs)
+        print(input_df)
+        print(type(inputs))
+        print(type(input_df))
         
         # Write the inputs to a temporary file to be processed.
-        filename = 'temp_' + process_id + '.txt'
+        filename = 'temp_' + str(process_id) + '.txt'
         input_df.to_csv(filename,index=False)
         
         try:
