@@ -16,12 +16,22 @@ from d3m.metadata import hyperparams, base as metadata_base
 from d3m.primitives.datasets import DatasetToDataFrame
 from common_primitives import utils as utils_cp
 
+import traceback
+
 __author__ = 'Distil'
 __version__ = '1.0.0'
 __contact__ = 'mailto:steve.kramer@newknowledge.io'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
+
+# 
+def log_traceback(ex, ex_traceback=None):
+    if ex_traceback is None:
+        ex_traceback = ex.__traceback__
+    tb_lines = [ line.rstrip('\n') for line in
+                 traceback.format_exception(ex.__class__, ex, ex_traceback)]
+    exception_logger.log(tb_lines)
 
 class Hyperparams(hyperparams.Hyperparams):
     algorithm = hyperparams.Enumeration(default = 'text_rank', 
@@ -123,9 +133,10 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         input_df.to_csv(filename,index=False)
         
         try:
-            sentences = TopicExtractor.ExtractivelySummarizeCorpus(corpus_path=filename,HTML=HTML_flag,sentence_count=nsentences)
-        except Exception:
+            sentences = TopicExtractor.ExtractivelySummarizeCorpus(corpus_path=filename,HTML=HTML_flag,sentence_count=nsentences)   
+        except Exception as ex:
             print('Error creating summary sentences.')
+            log_traceback(ex)
             sys.exit(-1)
         print(sentences)
         
@@ -133,6 +144,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             extracted_topics = TopicExtractor.ExtractTopics(sentences)
         except Exception:
             print('Error creating importance weights.')
+            log_traceback(ex)
             sys.exit(-1)
         print(extracted_topics)
 
