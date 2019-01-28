@@ -65,7 +65,7 @@ class Hyperparams(hyperparams.Hyperparams):
 class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
-        'id': "77bf4b92-2faa-3e38-bb7e-804131243a7f",
+        'id': "3a0bbaa6-b98c-493c-bd06-4b746eced523",
         'version': __version__,
         'name': "Possum",
         # Keywords do not have a controlled vocabulary. Authors can put here whatever they find suitable.
