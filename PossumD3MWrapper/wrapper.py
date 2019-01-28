@@ -162,7 +162,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         print(type(extracted_topics))
         # Create the output dataframe
         #out_df_possum = pandas.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
-        out_df_possum = pandas.DataFrame(list(extracted_topics.items()), columns=['sentence', 'importance_weight'])
+        out_df_possum = pandas.DataFrame(list(extracted_topics[0].items()), columns=['sentence', 'importance_weight'])
         print(out_df_possum)
 
         # Write the results to a temporary file for review.
