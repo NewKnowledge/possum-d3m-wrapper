@@ -17,6 +17,10 @@ from d3m.primitives.datasets import DatasetToDataFrame
 from common_primitives import utils as utils_cp
 
 import traceback
+import logging
+
+logger = logging.getLogger('possum_d3m_wrapper')
+logger.setLevel(logging.DEBUG)
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
@@ -31,7 +35,7 @@ def log_traceback(ex, ex_traceback=None):
         ex_traceback = ex.__traceback__
     tb_lines = [ line.rstrip('\n') for line in
                  traceback.format_exception(ex.__class__, ex, ex_traceback)]
-    exception_logger.log(tb_lines)
+    logger.log(tb_lines)
 
 class Hyperparams(hyperparams.Hyperparams):
     algorithm = hyperparams.Enumeration(default = 'text_rank', 
