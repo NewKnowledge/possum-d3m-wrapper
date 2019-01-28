@@ -37,6 +37,14 @@ def log_traceback(ex, ex_traceback=None):
                  traceback.format_exception(ex.__class__, ex, ex_traceback)]
     logger.log(tb_lines)
 
+try:
+    import nltk
+    nltk.download('punkt')
+except Exception as e:
+    print('Error downloading NLTK tokenizers.')
+    log_traceback(e)
+    sys.exit(-1)
+
 class Hyperparams(hyperparams.Hyperparams):
     algorithm = hyperparams.Enumeration(default = 'text_rank', 
         semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
