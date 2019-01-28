@@ -152,5 +152,5 @@ if __name__ == '__main__':
     print(inputs)
     print(type(inputs))
     possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 'language':'english','nsentences':30})
-    result = possum_client.produce(inputs=inputs.value)
+    result = possum_client.produce(inputs=inputs)
     print(result.value)
