@@ -159,9 +159,10 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             log_traceback(ex)
             sys.exit(-1)
         print(extracted_topics)
-
+        print(type(extracted_topics))
         # Create the output dataframe
-        out_df_possum = pandas.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
+        #out_df_possum = pandas.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
+        out_df_possum = pandas.DataFrame.from_dict(list(extracted_topics.items()), columns=['sentence', 'importance_weight'])
         print(out_df_possum)
         outd3m_df_possum = d3m_DataFrame(out_df_possum)
 
