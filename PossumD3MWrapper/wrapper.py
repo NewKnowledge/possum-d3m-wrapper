@@ -152,17 +152,18 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             sys.exit(-1)
         print(sentences)
         
-        try:
-            extracted_topics = TopicExtractor.ExtractTopics(sentences)
-        except Exception:
-            print('Error creating importance weights.')
-            log_traceback(ex)
-            sys.exit(-1)
-        print(extracted_topics)
-        print(type(extracted_topics))
+        # try:
+        #     extracted_topics = TopicExtractor.ExtractTopics(sentences)
+        # except Exception:
+        #     print('Error creating importance weights.')
+        #     log_traceback(ex)
+        #     sys.exit(-1)
+        # print(extracted_topics)
+        # print(type(extracted_topics))
+        #out_df_possum = pandas.DataFrame(list(extracted_topics[0].items()), columns=['sentence', 'importance_weight'])
+
         # Create the output dataframe
-        #out_df_possum = pandas.DataFrame.from_dict(extracted_topics, orient='index',columns=['sentence', 'importance_weight'])
-        out_df_possum = pandas.DataFrame(list(extracted_topics[0].items()), columns=['sentence', 'importance_weight'])
+        out_df_possum = pandas.DataFrame(sentences)
         print(out_df_possum)
 
         # Write the results to a temporary file for review.
