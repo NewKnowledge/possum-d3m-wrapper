@@ -18,6 +18,7 @@ from common_primitives import utils as utils_cp
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
+__contact__ = 'mailto:steve.kramer@newknowledge.io'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
@@ -49,6 +50,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         'keywords': ['Natural Language Processing','NLP','Text Summarization'],
         'source': {
             'name': __author__,
+            'contact': __contact__,
             'uris': [
                 # Unstructured URIs.
                 "https://github.com/NewKnowledge/possum-d3m-wrapper",
@@ -65,13 +67,13 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             ),
         }],
         # The same path the primitive is registered with entry points in setup.py.
-        'python_path': 'd3m.primitives.distil.Possum',
+        'python_path': 'd3m.primitives.feature_extraction.ibex.Possum',
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
         # best describe the primitive, make a merge request.
         'algorithm_types': [
             metadata_base.PrimitiveAlgorithmType.LATENT_SEMANTIC_ANALYSIS
         ],
-        'primitive_family': metadata_base.PrimitiveFamily.FEATURE_EXTRACTION ,
+        'primitive_family': metadata_base.PrimitiveFamily.FEATURE_EXTRACTION,
     })
 
     def __init__(self, *, hyperparams: Hyperparams)-> None:
@@ -117,6 +119,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         
         # Write the inputs to a temporary file to be processed.
         filename = 'temp_' + str(process_id) + '.txt'
+        print(filename)
         input_df.to_csv(filename,index=False)
         
         try:
@@ -149,6 +152,5 @@ if __name__ == '__main__':
     print(inputs)
     print(type(inputs))
     possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 'language':'english','nsentences':30})
-    #frame = pandas.read_csv("path/csv_containing_one_series_per_row.csv",dtype=str)
-    result = possum_client.produce(inputs=inputs.values)
+    result = possum_client.produce(inputs=inputs.value)
     print(result.value)
