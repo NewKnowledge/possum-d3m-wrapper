@@ -1,4 +1,4 @@
-from PossumD3MWrapper.nk_possum import nk_possum
+from PossumD3MWrapper.wrapper import nk_possum
 
 __version__ = '1.0.0'
 
