@@ -63,25 +63,25 @@ class Hyperparams(hyperparams.Hyperparams):
     pass
 
 class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
-        """
-        Applies the selected text summarization algorithms packaged in the Possum base library.  
-        The source library is the Python sumy library (https://pypi.org/project/sumy/).
+    """
+    Applies the selected text summarization algorithms packaged in the Possum base library.  
+    The source library is the Python sumy library (https://pypi.org/project/sumy/).
 
-        Parameters
-        ----------
-        Inputs : Input pandas dataframe where each row is a string representing a text document or a URL (if the source_type parameter is 'url').  
+    Parameters
+    ----------
+    Inputs : Input pandas dataframe where each row is a string representing a text document or a URL (if the source_type parameter is 'url').  
 
-        Hyperparams:
-            algorithm (type of summarization algorithm to use): 'luhn','edmundson','lsa','text_rank' (default),'sum_basic','kl'
-            source_type (type of source documents to be analyzed) = 'plain_text' (default),'url'
-            language (language to use for the NLTK stemming process) = 'danish','dutch','english' (default),'finnish','french','german','hungarian','italian','norwegian','porter','portuguese','romanian','russian','spanish','swedish'],
-            nsentences (number of summary sentences to return); default is 20
+    Hyperparams:
+        algorithm (type of summarization algorithm to use): 'luhn','edmundson','lsa','text_rank' (default),'sum_basic','kl'
+        source_type (type of source documents to be analyzed) = 'plain_text' (default),'url'
+        language (language to use for the NLTK stemming process) = 'danish','dutch','english' (default),'finnish','french','german','hungarian','italian','norwegian','porter','portuguese','romanian','russian','spanish','swedish'],
+        nsentences (number of summary sentences to return); default is 20
 
-        Returns
-        -------
-        Outputs
-            The output is a dataframe containing the requested number of summary sentences.
-        """
+    Returns
+    -------
+    Outputs
+        The output is a dataframe containing the requested number of summary sentences.
+    """
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "3a0bbaa6-b98c-493c-bd06-4b746eced523",
