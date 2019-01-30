@@ -82,12 +82,18 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         # Of course Python packages can also have their own dependencies, but sometimes it is necessary to
         # install a Python package first to be even able to run setup.py of another package. Or you have
         # a dependency which is not on PyPi.
-         'installation': [{
+         'installation': [
+            {
+                "type": "PIP",
+                "package_uri": "git+https://github.com/NewKnowledge/Possum@ffc4d92ac7f08fd291617c714a6fd023469d7924#egg=Possum-1.0.0"
+            },
+             {
             'type': metadata_base.PrimitiveInstallationType.PIP,
             'package_uri': 'git+https://github.com/NewKnowledge/possum-d3m-wrapper.git@{git_commit}#egg=PossumD3MWrapper'.format(
                 git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
         }],
+        
         # The same path the primitive is registered with entry points in setup.py.
         'python_path': 'd3m.primitives.feature_extraction.ibex.Possum',
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
