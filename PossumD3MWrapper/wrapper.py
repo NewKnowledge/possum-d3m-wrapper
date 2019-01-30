@@ -39,10 +39,13 @@ def log_traceback(ex, ex_traceback=None):
 
 try:
     import nltk
+    dirpath = os.getcwd()
+    print("Downloading NLTK data to ", dirpath, download_dir=dirpath)
     nltk.download('punkt')
 except Exception as e:
     print('Error downloading NLTK tokenizers.')
-    log_traceback(e)
+    if e:
+        log_traceback(e)
     sys.exit(-1)
 
 class Hyperparams(hyperparams.Hyperparams):
