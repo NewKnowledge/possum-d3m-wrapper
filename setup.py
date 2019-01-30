@@ -12,5 +12,5 @@ setup(name='PossumD3MWrapper',
         'd3m.primitives': [
             'feature_extraction.ibex.Possum = PossumD3MWrapper:nk_possum'
         ],
-    },
+    }, 
 )

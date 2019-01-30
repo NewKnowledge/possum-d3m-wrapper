@@ -40,8 +40,8 @@ def log_traceback(ex, ex_traceback=None):
 try:
     import nltk
     dirpath = os.getcwd()
-    print("Downloading NLTK data to ", dirpath, download_dir=dirpath)
-    nltk.download('punkt')
+    print("Downloading NLTK data to ", dirpath)
+    nltk.download('punkt', download_dir=dirpath)
 except Exception as e:
     print('Error downloading NLTK tokenizers.')
     if e:
