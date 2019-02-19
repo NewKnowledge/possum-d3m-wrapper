@@ -1,6 +1,7 @@
 import sys
 import os.path
 import os
+import typing
 import numpy as np
 import pandas
 
@@ -18,13 +19,14 @@ from common_primitives import utils as utils_cp
 
 import traceback
 import logging
+import nltk
 
 logger = logging.getLogger('possum_d3m_wrapper')
 logger.setLevel(logging.DEBUG)
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
-__contact__ = 'mailto:steve.kramer@newknowledge.io'
+__contact__ = 'mailto:nklabs@newknowledge.io'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
@@ -37,16 +39,7 @@ def log_traceback(ex, ex_traceback=None):
                  traceback.format_exception(ex.__class__, ex, ex_traceback)]
     logger.log(tb_lines)
 
-try:
-    import nltk
-    dirpath = os.getcwd()
-    print("Downloading NLTK data to ", dirpath)
-    nltk.download('punkt', download_dir=dirpath)
-except Exception as e:
-    print('Error downloading NLTK tokenizers.')
-    if e:
-        log_traceback(e)
-    sys.exit(-1)
+
 
 class Hyperparams(hyperparams.Hyperparams):
     algorithm = hyperparams.Enumeration(default = 'text_rank', 
@@ -61,6 +54,10 @@ class Hyperparams(hyperparams.Hyperparams):
         semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         values = ['danish','dutch','english','finnish','french','german','hungarian','italian','norwegian','porter','portuguese','romanian','russian','spanish','swedish'],
         description = 'language to use for the NLTK stemming process')
+    return_mode = hyperparams.Enumeration(default = 'originals_with_summaries_appended', 
+        semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        values = ['originals_with_summaries_appended','summaries_only'],
+        description = 'what data should be returned')
     nsentences = hyperparams.UniformInt(lower=1, upper=sys.maxsize, default=20, semantic_types=
         ['https://metadata.datadrivendiscovery.org/types/ControlParameter'], description = 'number of summary sentences to return')  
     pass
@@ -109,6 +106,12 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                 "type": "PIP",
                 "package_uri": "git+https://github.com/NewKnowledge/Possum@ffc4d92ac7f08fd291617c714a6fd023469d7924#egg=Possum-1.0.0"
             },
+            {
+                "type": "TGZ",
+                "key": "nltk_data",
+                "file_uri": "http://public.datadrivendiscovery.org/nltk_tokenizers.tar.gz",
+                "file_digest":"1eff17629fa9bcc06e979fef8a3804f1d29bf7b2502ef78d3be6cd9f1dab3f6f"
+            },
              {
             'type': metadata_base.PrimitiveInstallationType.PIP,
             'package_uri': 'git+https://github.com/NewKnowledge/possum-d3m-wrapper.git@{git_commit}#egg=PossumD3MWrapper'.format(
@@ -126,8 +129,9 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         'primitive_family': metadata_base.PrimitiveFamily.FEATURE_EXTRACTION,
     })
 
-    def __init__(self, *, hyperparams: Hyperparams)-> None:
-        super().__init__(hyperparams=hyperparams)
+    def __init__(self, *, hyperparams: Hyperparams, volumes: typing.Dict[str,str]=None)-> None:
+        super().__init__(hyperparams=hyperparams, volumes=volumes)
+        self.volumes = volumes
 
     def produce(self, *, inputs: Inputs) -> CallResult[Outputs]:
         """
@@ -145,8 +149,11 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         process_id = os.getpid()
         
         # set up model
-        TopicExtractor = Possum()
-
+        # Add method 
+        if self.hyperparams['algorithm']:
+            TopicExtractor = Possum(nltk_directory=self.volumes['nltk_data'])
+        else:
+            TopicExtractor = Possum(nltk_directory=self.volumes['nltk_data'], method=self.hyperparams['algorithm'])
         # set number of sentences to be returned
         if self.hyperparams['nsentences'] < 1 or not self.hyperparams['nsentences']:
             # enforce default value
@@ -198,8 +205,13 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         out_filename = 'output_' + str(process_id) + '.txt'
         out_df_possum.to_csv(out_filename,index=False)
 
-        outd3m_df_possum = d3m_DataFrame(out_df_possum)
-
+        if self.hyperparams['return_mode'] == 'summaries_only':
+            print("Returning only summaries.")
+            outd3m_df_possum = d3m_DataFrame(out_df_possum)
+        else:  # append summaries to the input data
+            print("Returning original documents with summaries.")
+            tmp_df = input_df.append(out_df_possum)
+            outd3m_df_possum = d3m_DataFrame(tmp_df)
         return CallResult(outd3m_df_possum)
 
 if __name__ == '__main__':
