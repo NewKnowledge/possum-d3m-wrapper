@@ -54,9 +54,9 @@ class Hyperparams(hyperparams.Hyperparams):
         semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         values = ['danish','dutch','english','finnish','french','german','hungarian','italian','norwegian','porter','portuguese','romanian','russian','spanish','swedish'],
         description = 'language to use for the NLTK stemming process')
-    return_mode = hyperparams.Enumeration(default = 'originals_with_summaries_appended', 
+    return_result = hyperparams.Enumeration(default = 'originals_with_summaries_appended', 
         semantic_types = ['https://metadata.datadrivendiscovery.org/types/ControlParameter'],
-        values = ['originals_with_summaries_appended','summaries_only'],
+        values = ['new','all','replace'],
         description = 'what data should be returned')
     nsentences = hyperparams.UniformInt(lower=1, upper=sys.maxsize, default=20, semantic_types=
         ['https://metadata.datadrivendiscovery.org/types/ControlParameter'], description = 'number of summary sentences to return')  
@@ -205,7 +205,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         out_filename = 'output_' + str(process_id) + '.txt'
         out_df_possum.to_csv(out_filename,index=False)
 
-        if self.hyperparams['return_mode'] == 'summaries_only':
+        if self.hyperparams['return_result'] == 'new' or self.hyperparams['return_result'] == 'replace':
             print("Returning only summaries.")
             outd3m_df_possum = d3m_DataFrame(out_df_possum)
         else:  # append summaries to the input data
