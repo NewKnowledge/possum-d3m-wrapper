@@ -104,7 +104,7 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
          'installation': [
             {
                 "type": "PIP",
-                "package_uri": "git+https://github.com/NewKnowledge/Possum@ffc4d92ac7f08fd291617c714a6fd023469d7924#egg=Possum-1.0.0"
+                "package_uri": "git+https://github.com/NewKnowledge/Possum@6a7aaa03cdc1665b9163b751ccd68f75079071c3#egg=Possum-1.0.0"
             },
             {
                 "type": "TGZ",
