@@ -103,10 +103,6 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         # a dependency which is not on PyPi.
          'installation': [
             {
-                "type": "PIP",
-                "package_uri": "git+https://github.com/NewKnowledge/Possum@6a7aaa03cdc1665b9163b751ccd68f75079071c3#egg=Possum-1.0.0"
-            },
-            {
                 "type": "TGZ",
                 "key": "nltk_data",
                 "file_uri": "http://public.datadrivendiscovery.org/nltk_tokenizers.tar.gz",
