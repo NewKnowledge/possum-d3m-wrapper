@@ -218,6 +218,9 @@ if __name__ == '__main__':
     inputs = d3m_DataFrame(input_df)
     print(inputs)
     print(type(inputs))
-    possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 'language':'english','nsentences':30, 'return_result':'all'})
+    volumes = {} # d3m large primitive architecture dictionary of large files
+    volumes['nltk_data'] = '/tmp/nltk_data'
+    possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 
+    'language':'english','nsentences':30, 'return_result':'all'}, volumes=volumes)
     result = possum_client.produce(inputs=inputs)
     print(result.value)
