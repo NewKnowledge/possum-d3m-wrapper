@@ -4,9 +4,9 @@ setup(name='PossumD3MWrapper',
     version='1.0.1',
     description='A thin wrapper for interacting with New Knowledge text summarization library Possum',
     packages=['PossumD3MWrapper'],
-    install_requires=['Possum==1.1.0'],
+    install_requires=['Possum==1.1.2'],
     dependency_links=[
-        "git+https://github.com/NewKnowledge/Possum@269d39180f07167507180e7f48d6b285f92183df#egg=Possum-1.0.1"
+        "git+https://github.com/NewKnowledge/Possum@0f51cef455643c50df0ba3a185eab4324762d420#egg=Possum-1.1.2"
     ],
     entry_points = {
         'd3m.primitives': [
