@@ -116,13 +116,13 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         }],
         
         # The same path the primitive is registered with entry points in setup.py.
-        'python_path': 'd3m.primitives.feature_extraction.ibex.Possum',
+        'python_path': 'd3m.primitives.data_cleaning.text_summarization.Possum',
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
         # best describe the primitive, make a merge request.
         'algorithm_types': [
             metadata_base.PrimitiveAlgorithmType.LATENT_SEMANTIC_ANALYSIS
         ],
-        'primitive_family': metadata_base.PrimitiveFamily.FEATURE_EXTRACTION,
+        'primitive_family': metadata_base.PrimitiveFamily.DATA_CLEANING,
     })
 
     def __init__(self, *, hyperparams: Hyperparams, volumes: typing.Dict[str,str]=None)-> None:
