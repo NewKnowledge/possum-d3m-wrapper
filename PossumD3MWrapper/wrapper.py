@@ -20,12 +20,13 @@ from common_primitives import utils as utils_cp
 import traceback
 import logging
 import nltk
+import datetime
 
 logger = logging.getLogger('possum_d3m_wrapper')
 logger.setLevel(logging.DEBUG)
 
 __author__ = 'Distil'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __contact__ = 'mailto:nklabs@newknowledge.io'
 
 Inputs = container.pandas.DataFrame
@@ -166,46 +167,40 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         #input_df = pandas.DataFrame(inputs.values)
         
         input_df = pandas.DataFrame(inputs)
-        print(input_df)
-        print(type(inputs))
-        print(type(input_df))
         
         # Write the inputs to a temporary file to be processed.
-        filename = 'temp_' + str(process_id) + '.txt'
-        print(filename)
+        process_id = os.getpid()
+        current_datetime = str(datetime.datetime.now()).replace(" ","_")
+        filename = 'temp_' + str(process_id) + '_' + current_datetime + '.txt'
+        logger.info(filename)
         input_df.to_csv(filename,index=False)
         
         try:
             sentences = TopicExtractor.ExtractivelySummarizeCorpus(corpus_path=filename,HTML=HTML_flag,sentence_count=nsentences)   
         except Exception as ex:
-            print('Error creating summary sentences.')
+            logger.info('Error creating summary sentences.')
             log_traceback(ex)
             sys.exit(-1)
-        print(sentences)
+        logger.info(sentences)
         
-        # try:
-        #     extracted_topics = TopicExtractor.ExtractTopics(sentences)
-        # except Exception:
-        #     print('Error creating importance weights.')
-        #     log_traceback(ex)
-        #     sys.exit(-1)
-        # print(extracted_topics)
-        # print(type(extracted_topics))
-        #out_df_possum = pandas.DataFrame(list(extracted_topics[0].items()), columns=['sentence', 'importance_weight'])
-
+        
         # Create the output dataframe
         out_df_possum = pandas.DataFrame(sentences)
-        print(out_df_possum)
+        logger.info(out_df_possum)
+
+        # Delete the temporary file.
+        if os.path.exists(filename):
+            os.remove(filename)
 
         # Write the results to a temporary file for review.
-        out_filename = 'output_' + str(process_id) + '.txt'
+        out_filename = 'output_' + filename
         out_df_possum.to_csv(out_filename,index=False)
 
         if self.hyperparams['return_result'] == 'new' or self.hyperparams['return_result'] == 'replace':
-            print("Returning only summaries.")
+            logger.info("Returning only summaries.")
             outd3m_df_possum = d3m_DataFrame(out_df_possum)
         else:  # append summaries to the input data
-            print("Returning original documents with summaries.")
+            logger.info("Returning original documents with summaries.")
             tmp_df = input_df.append(out_df_possum)
             outd3m_df_possum = d3m_DataFrame(tmp_df)
         return CallResult(outd3m_df_possum)
@@ -216,11 +211,9 @@ if __name__ == '__main__':
     # https://c3.nasa.gov/dashlink/resources/138/
     input_df = pandas.read_csv('data/NASA_TestData.txt', dtype=str, header=None,index_col=False)
     inputs = d3m_DataFrame(input_df)
-    print(inputs)
-    print(type(inputs))
     volumes = {} # d3m large primitive architecture dictionary of large files
     volumes['nltk_data'] = '/tmp/nltk_data'
     possum_client = nk_possum(hyperparams={'algorithm':'text_rank','source_type':'plain_text', 
     'language':'english','nsentences':30, 'return_result':'all'}, volumes=volumes)
     result = possum_client.produce(inputs=inputs)
-    print(result.value)
+    logger.info(result.value)
