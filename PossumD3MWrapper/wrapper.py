@@ -193,8 +193,8 @@ class nk_possum(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             os.remove(filename)
 
         # Write the results to a temporary file for review.
-        out_filename = 'output_' + filename
-        out_df_possum.to_csv(out_filename,index=False)
+        # out_filename = 'output_' + filename
+        # out_df_possum.to_csv(out_filename,index=False)
 
         if self.hyperparams['return_result'] == 'new' or self.hyperparams['return_result'] == 'replace':
             logger.info("Returning only summaries.")
