@@ -6,7 +6,7 @@ setup(name='PossumD3MWrapper',
     packages=['PossumD3MWrapper'],
     install_requires=['Possum==1.1.4'],
     dependency_links=[
-        "git+https://github.com/NewKnowledge/Possum@dc3ee5d479d225ef7cdf1f19ba4cf446ee1c2ec2#egg=Possum-1.1.4"
+        "git+https://github.com/NewKnowledge/Possum@f1346af84167cdbad9b59c390369873a41709be2#egg=Possum-1.1.4"
     ],
     entry_points = {
         'd3m.primitives': [
