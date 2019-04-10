@@ -26,7 +26,7 @@ logger = logging.getLogger('possum_d3m_wrapper')
 logger.setLevel(logging.DEBUG)
 
 __author__ = 'Distil'
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __contact__ = 'mailto:nklabs@newknowledge.io'
 
 Inputs = container.pandas.DataFrame
