@@ -6,7 +6,6 @@ import numpy as np
 import pandas
 
 from Possum import Possum
-from tslearn.datasets import CachedDatasets
 
 from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
